@@ -5,3 +5,17 @@ Saved/
 .vs/
 *.VC.db
 *.VC.opendb
+
+# Visual Studio
+*.suo
+*.user
+*.userprefs
+
+# Logs / build junk
+*.log
+*.obj
+*.pdb
+
+# OS junk
+Thumbs.db
+.DS_Store
