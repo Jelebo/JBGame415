@@ -7,6 +7,9 @@
 #include "Materials/MaterialInterface.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Kismet/GameplayStatics.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
 
 AJBGame415Projectile::AJBGame415Projectile()
 {
@@ -16,11 +19,11 @@ AJBGame415Projectile::AJBGame415Projectile()
 	CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
 	CollisionComp->OnComponentHit.AddDynamic(this, &AJBGame415Projectile::OnHit);
 
-	// Players can't walk on it
+	// Players cannot walk on the projectile
 	CollisionComp->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
 	CollisionComp->CanCharacterStepUpOn = ECB_No;
 
-	// Set as root component
+	// Set the collision sphere as the root component
 	RootComponent = CollisionComp;
 
 	// Create a visible mesh for the projectile
@@ -28,7 +31,7 @@ AJBGame415Projectile::AJBGame415Projectile()
 	ProjectileMesh->SetupAttachment(RootComponent);
 	ProjectileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	// Use a ProjectileMovementComponent to govern this projectile's movement
+	// Create the movement component that controls projectile speed and bounce behavior
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileComp"));
 	ProjectileMovement->UpdatedComponent = CollisionComp;
 	ProjectileMovement->InitialSpeed = 3000.f;
@@ -36,7 +39,7 @@ AJBGame415Projectile::AJBGame415Projectile()
 	ProjectileMovement->bRotationFollowsVelocity = true;
 	ProjectileMovement->bShouldBounce = true;
 
-	// Die after 3 seconds by default
+	// Destroy the projectile automatically after 3 seconds
 	InitialLifeSpan = 3.0f;
 }
 
@@ -46,10 +49,12 @@ void AJBGame415Projectile::BeginPlay()
 
 	if (ProjectileMesh)
 	{
+		// Create a dynamic material instance so the projectile color can be changed at runtime
 		UMaterialInstanceDynamic* DynMat = ProjectileMesh->CreateAndSetMaterialInstanceDynamic(0);
 
 		if (DynMat)
 		{
+			// Generate and store a random color for this projectile
 			RandomColor = FLinearColor(
 				FMath::FRand(),
 				FMath::FRand(),
@@ -57,6 +62,7 @@ void AJBGame415Projectile::BeginPlay()
 				1.0f
 			);
 
+			// Apply the random color to the projectile material
 			DynMat->SetVectorParameterValue(TEXT("Color"), RandomColor);
 		}
 	}
@@ -82,6 +88,7 @@ void AJBGame415Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActo
 
 			if (DecalMID)
 			{
+				// Pass the projectile color into the decal material
 				DecalMID->SetVectorParameterValue(TEXT("Color"), RandomColor);
 			}
 
@@ -95,6 +102,23 @@ void AJBGame415Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActo
 				DecalRotation,
 				DecalLifeSpan
 			);
+		}
+	}
+
+	// Spawn the Niagara particle system at the hit location
+	if (ImpactParticleSystem)
+	{
+		UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			ImpactParticleSystem,
+			Hit.ImpactPoint,
+			Hit.ImpactNormal.Rotation()
+		);
+
+		if (SpawnedEffect)
+		{
+			// Pass the projectile color into the particle system so it matches the decal and projectile
+			SpawnedEffect->SetVariableLinearColor(TEXT("ParticleColor"), RandomColor);
 		}
 	}
 
