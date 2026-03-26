@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "JBGame415Projectile.h"
+#include "PerlinProc.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -70,6 +71,13 @@ void AJBGame415Projectile::BeginPlay()
 
 void AJBGame415Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	// If the projectile hits the procedural terrain, deform it
+	APerlinProc* Terrain = Cast<APerlinProc>(OtherActor);
+	if (Terrain)
+	{
+		Terrain->AlterMesh(Hit.ImpactPoint);
+	}
+
 	// Apply impulse if the hit object simulates physics
 	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr) && OtherComp->IsSimulatingPhysics())
 	{
