@@ -23,23 +23,22 @@ protected:
 	virtual void BeginPlay() override;
 
 	// Components
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Portal")
 	UBoxComponent* BoxComponent;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Portal")
 	UStaticMeshComponent* Mesh;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Portal")
 	USceneCaptureComponent2D* SceneCapture;
 
 	// Portal data
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Portal")
 	UTextureRenderTarget2D* RenderTarget;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Portal")
 	APortal* OtherPortal;
 
-	// Functions
 	UFUNCTION()
 	void OnOverlapBegin(
 		UPrimitiveComponent* OverlappedComp,

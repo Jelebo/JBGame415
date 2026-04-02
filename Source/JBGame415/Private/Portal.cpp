@@ -7,16 +7,13 @@ APortal::APortal()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	// Root
 	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
 	RootComponent = BoxComponent;
 
-	// Mesh
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(RootComponent);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	// Scene Capture
 	SceneCapture = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("SceneCapture"));
 	SceneCapture->SetupAttachment(Mesh);
 }
